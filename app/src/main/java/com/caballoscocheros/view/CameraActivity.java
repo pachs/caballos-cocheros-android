@@ -1,17 +1,18 @@
 package com.caballoscocheros.view;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.caballoscocheros.R;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
-public class CameraActivity extends BaseDrawerActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     static {
         if (!OpenCVLoader.initDebug()) {
@@ -19,19 +20,17 @@ public class CameraActivity extends BaseDrawerActivity implements CameraBridgeVi
         }
     }
 
-    private CameraBridgeViewBase mOpenCvCameraView;
+    private JavaCameraView mOpenCvCameraView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setActivityContent(R.layout.content_camera);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        View bar = findViewById(R.id.toolbar);
-        bar.setVisibility(View.GONE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setContentView(R.layout.content_camera);
 
         //OpenCV
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_capture);
+        mOpenCvCameraView = (JavaCameraView) findViewById(R.id.camera_capture);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 

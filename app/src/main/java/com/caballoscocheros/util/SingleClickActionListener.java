@@ -12,6 +12,11 @@ public abstract class SingleClickActionListener implements View.OnClickListener 
 
     private long mLastClickTime;
 
+    /**
+     * Listener para que el sistema solo registre un toque dentro del rango especificado.
+     *
+     * @param v la vista que recibe el toque.
+     */
     public abstract void onSingleClick(View v);
 
     @Override

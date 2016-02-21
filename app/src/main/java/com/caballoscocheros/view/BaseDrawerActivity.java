@@ -37,8 +37,8 @@ public class BaseDrawerActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
-                if (id == R.id.nav_camera) {
-                    startActivity(new Intent(BaseDrawerActivity.this, CameraActivity.class));
+                if (id == R.id.nav_manage){
+                    startActivity(new Intent(BaseDrawerActivity.this, SettingsActivity.class));
                 }
 
                 return true;
