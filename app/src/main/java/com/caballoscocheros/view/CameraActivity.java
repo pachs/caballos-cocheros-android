@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
+import com.caballoscocheros.CaballosCocheros;
 import com.caballoscocheros.R;
 
 import org.opencv.android.CameraBridgeViewBase;
@@ -14,13 +15,23 @@ import org.opencv.core.Mat;
 
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
+    /**
+     * Bloque estatico que inicia la libreria de OpenCV
+     */
     static {
         if (!OpenCVLoader.initDebug()) {
             //Open CV init errors
         }
     }
 
+    /**
+     * Vista de camara de OpenCV.
+     */
     private JavaCameraView mOpenCvCameraView;
+    /**
+     * Instancia del singleton de esta aplicacion.
+     */
+    private CaballosCocheros mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +46,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         mOpenCvCameraView.enableView();
+
+        //Other
+        mApp = (CaballosCocheros) getApplication();
     }
 
     @Override
@@ -67,6 +81,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        return inputFrame.rgba();
+//        ObjectRecognition r = mApp.getObjectRecon();
+
+        Mat frame = inputFrame.rgba();
+//        r.processFrame(frame);
+
+        return frame;
     }
 }

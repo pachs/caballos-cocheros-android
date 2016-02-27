@@ -17,6 +17,11 @@ public class DatabaseHelper extends DaoMaster.OpenHelper {
     private SQLiteDatabase db;
     private DaoSession daoSession;
 
+    /**
+     * Abre una nueva sesion en la base de datos. Se debe usar esta misma sesion durante la ejecucion de la aplicacion.
+     *
+     * @param context el contexto de la aplicacion.
+     */
     public DatabaseHelper(Context context) {
         super(context, "caballoscocheros.db", null);
 
