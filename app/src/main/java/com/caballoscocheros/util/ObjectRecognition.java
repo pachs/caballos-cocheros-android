@@ -1,6 +1,11 @@
 package com.caballoscocheros.util;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.util.Log;
+
+import com.caballoscocheros.R;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -10,6 +15,11 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /**
  * Detecta los objetos que se quieren detectar.
@@ -28,8 +38,8 @@ public class ObjectRecognition {
      */
     private CascadeClassifier plateClassifier;
 
-    public ObjectRecognition() {
-        if (horseClassifier.load("haar_caballos.xml")) {
+    public ObjectRecognition(String filePath) {
+        if (horseClassifier.load(filePath)) {
             Log.e(TAG, "Error cargando modelo de reconocimiento");
         }
     }

@@ -7,6 +7,7 @@ import android.view.WindowManager;
 
 import com.caballoscocheros.CaballosCocheros;
 import com.caballoscocheros.R;
+import com.caballoscocheros.util.ObjectRecognition;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
@@ -81,10 +82,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-//        ObjectRecognition r = mApp.getObjectRecon();
+        ObjectRecognition r = mApp.getObjectRecon();
 
         Mat frame = inputFrame.rgba();
-//        r.processFrame(frame);
+       r.processFrame(frame);
 
         return frame;
     }
