@@ -1,10 +1,14 @@
 package com.caballoscocheros;
 
+import android.app.AlertDialog;
 import android.app.Application;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 
 import com.caballoscocheros.util.DatabaseHelper;
 import com.caballoscocheros.util.ObjectRecognition;
+import com.caballoscocheros.view.MainActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,22 +41,25 @@ public class CaballosCocheros extends Application {
 
     public ObjectRecognition getObjectRecon() {
         if (recon == null) {
-            File f = new File(getCacheDir()+"/haar_caballos.xml");
-            if (!f.exists()) try {
+            try{
                 InputStream is = getAssets().open("haar_caballos.xml");
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
+                File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+                File mCascadeFile = new File(cascadeDir, "haar_caballos.xml");
+                FileOutputStream os = new FileOutputStream(mCascadeFile);
+
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
                 is.close();
-                FileOutputStream fos = new FileOutputStream(f);
-                fos.write(buffer);
-                fos.close();
-            } catch (Exception e) { throw new RuntimeException(e); }
-            Log.d("MainClass", "\n El path es " + f.getPath()+"\n");
-
-            recon = new ObjectRecognition(f.getAbsolutePath());
+                os.close();
+                recon = new ObjectRecognition(mCascadeFile.getAbsolutePath());
+                Log.e("Cargue", "Objeto de reconocimiento creado exitosamente");
+            } catch(Exception e){
+                Log.e("Cargue", e.getMessage());
+            }
         }
-
         return recon;
     }
 

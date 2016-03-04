@@ -38,8 +38,9 @@ public class ObjectRecognition {
      */
     private CascadeClassifier plateClassifier;
 
-    public ObjectRecognition(String filePath) {
-        if (horseClassifier.load(filePath)) {
+    public ObjectRecognition(String filePath) throws Exception{
+        horseClassifier = new CascadeClassifier(filePath);
+        if (horseClassifier.empty()) {
             Log.e(TAG, "Error cargando modelo de reconocimiento");
         }
     }
@@ -50,7 +51,7 @@ public class ObjectRecognition {
      * @param frame la imagen capturada.
      */
     public void processFrame(Mat frame) {
-        if (!frame.empty()) {
+        if (frame!=null && !frame.empty()) {
             MatOfRect detected = new MatOfRect();
 
             //TODO Ajustar minSize y maxSize para que no haga deteccion si el objeto es muy grande o muy pequeno
