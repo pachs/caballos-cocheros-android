@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/modules" />
             <option value="$PROJECT_DIR$/modules/DatabaseGenerator" />
-            <option value="$PROJECT_DIR$/modules/OpenCV310" />
           </set>
         </option>
       </GradleProjectSettings>

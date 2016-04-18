@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CaballosCocheros.iml" filepath="$PROJECT_DIR$/CaballosCocheros.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/DatabaseGenerator/DatabaseGenerator.iml" filepath="$PROJECT_DIR$/modules/DatabaseGenerator/DatabaseGenerator.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/OpenCV310/OpenCV310.iml" filepath="$PROJECT_DIR$/modules/OpenCV310/OpenCV310.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/caballos-cocheros-android.iml" filepath="$PROJECT_DIR$/caballos-cocheros-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/modules.iml" filepath="$PROJECT_DIR$/modules/modules.iml" />
     </modules>
   </component>

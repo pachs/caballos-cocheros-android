@@ -1,1 +1,1 @@
-include ':app', ':modules:DatabaseGenerator', ':modules:OpenCV310'
+include ':app', ':modules:DatabaseGenerator'//, ':modules:OpenCV310'
