@@ -12,23 +12,44 @@ import com.caballoscocheros.util.DatabaseHelper;
 //import com.caballoscocheros.util.ObjectRecognition;
 import com.caballoscocheros.view.MainActivity;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
 
 /**
  * Created by Alvin on 21/02/2016.
  */
 public class CaballosCocheros extends Application {
 
+    private final static String URL_DESCARGA = "http://157.253.236.146:8060/cocheros/rest/download";
+    private final static String URL_CARGA = "http://157.253.236.146:8060/cocheros/rest/upload";
+
     /**
      * Instancia de la base de datos que se usa en esta ejecucion de la aplicacion.
      */
-    private DatabaseHelper dbHelper;
+    //private DatabaseHelper dbHelper;
+
+    private static ArrayList<MainActivity.ReconocimientoPlaca> reconocimientos;
+
+    private static Date ultimaActualizacion;
     /**
      * Instancia del objeto que reconoce imagenes.
      */
@@ -41,9 +62,9 @@ public class CaballosCocheros extends Application {
         //dbHelper = new DatabaseHelper(this);
     }
 
-    public DatabaseHelper getDbHelper() {
-        return dbHelper;
-    }
+//    public DatabaseHelper getDbHelper() {
+//        return dbHelper;
+//    }
 
 //    No se usa por el momento
 
@@ -71,6 +92,7 @@ public class CaballosCocheros extends Application {
 //        return recon;
 //    }
 
+    //Consigue la latitud y longitud de una imagen tomada
     public float[] getLatLng(String ruta)throws Exception{
         try {
             ExifInterface exif = new ExifInterface(ruta);
@@ -79,7 +101,7 @@ public class CaballosCocheros extends Application {
                 return latlng;
             }
             else{
-                //throw new Exception("No fue posible extraer la latitud y longitud.");
+                throw new Exception("No fue posible extraer la latitud y longitud.");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,6 +109,7 @@ public class CaballosCocheros extends Application {
         return null;
     }
 
+    //Recoge la fecha de captura de una imagen
     public Date getImageDate(String ruta){
         try{
             ExifInterface exif = new ExifInterface(ruta);
@@ -102,6 +125,130 @@ public class CaballosCocheros extends Application {
         return null;
     }
 
+    //Retorna las capturas que se tienen en un momento dado
+    public ArrayList<MainActivity.ReconocimientoPlaca> darCapturas(){
+        return reconocimientos;
+    }
+
+    //Envia la captura de una captura de caballo en un lugar y hora específicos al servidor
+    public static String enviarCaptura(double lat, double lng, String placa, Date fechaCaptura){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(URL_CARGA);
+
+            String json = "";
+
+            // 3. build jsonObject
+            JSONObject jsonObject = new JSONObject();
+            final String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+            jsonObject.accumulate("uuid", uuid);
+            jsonObject.accumulate("latitude", lat);
+            jsonObject.accumulate("longitude", lng);
+            jsonObject.accumulate("plate", placa);
+
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+            df.setTimeZone(tz);
+            String capturaAsISO = df.format(fechaCaptura);
+            jsonObject.accumulate("time",capturaAsISO);
+            String nowAsISO = df.format(new Date());
+            jsonObject.accumulate("syncTime",nowAsISO);
+
+            //Ponemos un array de 1 Json en el POST
+            JSONArray array = new JSONArray();
+            array.put(jsonObject);
+
+            json = array.toString();
+
+            // ** Alternative way to convert Person object to JSON string usin Jackson Lib
+            // ObjectMapper mapper = new ObjectMapper();
+            // json = mapper.writeValueAsString(person);
+
+            StringEntity se = new StringEntity(json);
+
+            httpPost.setEntity(se);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            HttpResponse httpResponse = httpclient.execute(httpPost);
+            inputStream = httpResponse.getEntity().getContent();
+
+            if(inputStream != null){
+                BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+                String line = "";
+                result = "";
+                while((line = bufferedReader.readLine()) != null)
+                    result += line;
+
+                inputStream.close();
+                return result;
+            }
+            else
+                result = "Ocurrió un error enviando el Post.";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+        return result;
+    }
+
+    public static String actualizarCaballos(){
+        InputStream inputStream = null;
+        String result;
+        try {
+            HttpClient httpclient = new DefaultHttpClient();
+            String descarga = URL_DESCARGA;
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+            df.setTimeZone(tz);
+
+            if(ultimaActualizacion!=null){
+                String fecha = df.format(ultimaActualizacion);
+                descarga+="?time="+ fecha;
+            }
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(descarga));
+            inputStream = httpResponse.getEntity().getContent();
+            if(inputStream != null){
+                BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+                String line;
+                result = "";
+                while((line = bufferedReader.readLine()) != null)
+                    result += line;
+
+                inputStream.close();
+                JSONArray array = new JSONArray(result);
+                if(!array.isNull(0) && array.length()>0){
+                    JSONObject ultimo = (JSONObject) array.get(array.length()-1);
+                    //Se actualiza respecto al tiempo de captura (debería ser syncTime?)
+                    ultimaActualizacion = df.parse(ultimo.getString("time"));
+
+                    for(int i=0; i<array.length();i++){
+                        JSONObject json = (JSONObject) array.get(i);
+                        double lat = json.getDouble("latitude");
+                        double lng = json.getDouble("longitude");
+                        String placa = json.getString("plate");
+                        String time = json.getString("time");
+                        Date fecha = df.parse(time);
+                        MainActivity.ReconocimientoPlaca rp = new MainActivity.ReconocimientoPlaca(lat,lng,placa,fecha);
+                        reconocimientos.add(rp);
+                    }
+                    result = "Se actualizaron correctamente las capturas.";
+                }
+            }
+            else
+                result = "Hubo un problema actualizando los caballos.";
+
+        } catch (IOException e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+            result = "Problema con el InputStream al actualizar caballos";
+        } catch (Exception e) {
+            Log.d("Error actualización", e.getLocalizedMessage());
+            result = "Problema con la comunicación con el servidor al actualizar caballos";
+        }
+        return result;
+    }
+
     public void onLowMemory() {
         super.onLowMemory();
     }
@@ -110,4 +257,6 @@ public class CaballosCocheros extends Application {
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
     }
+
+
 }
